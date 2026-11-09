@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Potion Notifier – 3D model</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3eee4;--fg:#2b2620;--muted:#6f655a;--card:#fffaf0;--bd:#d6ccbb;--ac:#7a4fd0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15121c;--fg:#ece6f5;--muted:#a198b3;--card:#1f1a2b;--bd:#3b3252;--ac:#a98bff}}
+:root[data-theme="dark"]{--bg:#15121c;--fg:#ece6f5;--muted:#a198b3;--card:#1f1a2b;--bd:#3b3252;--ac:#a98bff}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+#stage{flex:1;position:relative;min-height:0;touch-action:none;cursor:grab}
+#stage canvas{display:block;width:100%;height:100%}
+#hud{position:absolute;left:0;right:0;top:10px;text-align:center;pointer-events:none;padding:0 12px}
+#hud h1{font-size:16px;font-weight:600;margin:0 0 2px}
+#status{font-size:13px;color:var(--muted)}
+#bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px 12px 14px}
+button{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:8px 14px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+button.primary{background:var(--ac);border-color:var(--ac);color:#fff}
+#hint{font-size:12px;color:var(--muted);text-align:center;padding:0 12px 8px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="hud"><h1>Potion Notifier</h1><div id="status">Standby</div></div>
+</div>
+<div id="hint">Drag to rotate · tap the button on the cork lid to switch power</div>
+<div id="bar">
+  <button class="primary" id="notify">Simulate notification</button>
+  <button id="bottom">Show USB-C port</button>
+  <button id="power">Power: on</button>
+  <button id="reset">Reset view</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+var stage=document.getElementById('stage'),statusEl=document.getElementById('status');
+var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+stage.appendChild(renderer.domElement);
+var scene=new THREE.Scene();
+var camera=new THREE.PerspectiveCamera(32,1,0.1,100);
+camera.position.set(0,0.8,11);
+scene.add(new THREE.AmbientLight(0xffffff,0.65));
+var key=new THREE.DirectionalLight(0xffffff,0.9);key.position.set(4,6,5);scene.add(key);
+var rim=new THREE.DirectionalLight(0x9aa8ff,0.5);rim.position.set(-5,2,-4);scene.add(rim);
+
+var root=new THREE.Group();scene.add(root);
+var bottle=new THREE.Group();bottle.position.y=-1.75;root.add(bottle);
+
+// Bottle profile (flat base, round belly, narrow neck)
+var pts=[[0.62,0],[0.85,0.06],[0.98,0.35],[1.02,0.8],[0.95,1.25],[0.74,1.7],[0.46,1.98],[0.31,2.2],[0.28,2.65]].map(function(p){return new THREE.Vector2(p[0],p[1]);});
+var prof=[new THREE.Vector2(0,0)].concat(new THREE.SplineCurve(pts).getPoints(60));
+
+// Frosted glass shell
+var glass=new THREE.Mesh(new THREE.LatheGeometry(prof,64),new THREE.MeshStandardMaterial({color:0xbfe6ff,transparent:true,opacity:0.3,roughness:0.15,metalness:0.1,side:THREE.DoubleSide,depthWrite:false}));
+glass.renderOrder=3;bottle.add(glass);
+
+// Inner glow volume (the LED light)
+var inner=prof.filter(function(p){return p.y<1.9;}).map(function(p){return new THREE.Vector2(p.x*0.88,p.y*0.95+0.05);});
+inner.push(new THREE.Vector2(0,inner[inner.length-1].y));
+var glowMat=new THREE.MeshBasicMaterial({color:0x222233,transparent:true,opacity:0.12,depthWrite:false,side:THREE.DoubleSide});
+var glow=new THREE.Mesh(new THREE.LatheGeometry(inner,48),glowMat);glow.renderOrder=2;bottle.add(glow);
+
+// Electronics visible through the glass: battery + board + 3 LED pixels
+var batt=new THREE.Mesh(new THREE.BoxGeometry(0.9,1.1,0.14),new THREE.MeshStandardMaterial({color:0x2b2f3d,roughness:0.6}));batt.position.set(0,1.0,-0.1);bottle.add(batt);
+var board=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.52,0.05),new THREE.MeshStandardMaterial({color:0x1f7c96,roughness:0.5}));board.position.set(0,1.0,0.0);bottle.add(board);
+var pixMats=[],pixels=[];
+for(var i=0;i<3;i++){
+  var a=i*2.094+0.5;
+  var m=new THREE.MeshBasicMaterial({color:0x333344});pixMats.push(m);
+  var s=new THREE.Mesh(new THREE.SphereGeometry(0.07,16,12),m);
+  s.position.set(Math.cos(a)*0.4,0.3,Math.sin(a)*0.4);bottle.add(s);
+}
+var light=new THREE.PointLight(0x7a4fd0,0,7);light.position.set(0,0.9,0);bottle.add(light);
+
+// Cork, brass collar, key ring
+var gold=new THREE.MeshStandardMaterial({color:0xd6a83a,metalness:0.8,roughness:0.35});
+var silver=new THREE.MeshStandardMaterial({color:0xc9ced6,metalness:0.9,roughness:0.3});
+var cork=new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.31,0.62,32),new THREE.MeshStandardMaterial({color:0xa9744a,roughness:1}));
+cork.position.y=2.95;bottle.add(cork);
+var collar=new THREE.Mesh(new THREE.TorusGeometry(0.33,0.05,12,40),gold);collar.rotation.x=Math.PI/2;collar.position.y=2.58;bottle.add(collar);
+var loop=new THREE.Mesh(new THREE.TorusGeometry(0.17,0.035,10,32),gold);loop.position.set(0.5,2.58,0);bottle.add(loop);
+var ring=new THREE.Mesh(new THREE.TorusGeometry(0.6,0.03,10,48),silver);ring.rotation.y=Math.PI/2;ring.position.set(0.5,3.18,0);bottle.add(ring);
+
+// Start-up button on the lid
+var bezel=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.25,0.04,32),gold);bezel.position.y=3.28;bottle.add(bezel);
+var domeMat=new THREE.MeshStandardMaterial({color:0xf2e9d8,roughness:0.35});
+var dome=new THREE.Mesh(new THREE.SphereGeometry(0.16,24,12,0,Math.PI*2,0,Math.PI/2),domeMat);
+dome.scale.y=0.6;dome.position.y=3.3;bottle.add(dome);
+var ringMat=new THREE.MeshBasicMaterial({color:0x2ecc71});
+var statusRing=new THREE.Mesh(new THREE.TorusGeometry(0.21,0.018,8,40),ringMat);statusRing.rotation.x=Math.PI/2;statusRing.position.y=3.31;bottle.add(statusRing);
+
+// USB-C port on the bottom face
+var rimBox=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.03,0.22),silver);rimBox.position.y=-0.005;bottle.add(rimBox);
+var hole=new THREE.Mesh(new THREE.BoxGeometry(0.44,0.034,0.14),new THREE.MeshBasicMaterial({color:0x050507}));hole.position.y=-0.012;bottle.add(hole);
+var tongue=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.036,0.03),new THREE.MeshStandardMaterial({color:0x777b86,metalness:0.7,roughness:0.4}));tongue.position.y=-0.013;bottle.add(tongue);
+
+// State
+var power=true,notif=null,colors=[[0x2ecc71,'call (green)'],[0x4aa3ff,'message (blue)'],[0xffcc33,'email (yellow)']],ci=0;
+var cur={x:0.15,y:-0.5},tar={x:0.15,y:-0.5},auto=true,drag=false,bottomView=false;
+
+function setGlow(col,k){
+  glowMat.color.setHex(col);glowMat.opacity=0.1+0.5*k;
+  light.color.setHex(col);light.intensity=2.2*k;
+  pixMats.forEach(function(m){m.color.setHex(k>0.02?col:0x333344);});
+}
+function refreshPower(){
+  ringMat.color.setHex(power?0x2ecc71:0x555560);
+  document.getElementById('power').textContent='Power: '+(power?'on':'off');
+  if(!power){notif=null;setGlow(0x222233,0);statusEl.textContent='Power is off';}
+  else if(!notif){statusEl.textContent='Standby';setGlow(0x222233,0);}
+}
+function notify(){
+  if(!power){statusEl.textContent='Power is off - switch on first';return;}
+  var c=colors[ci++%colors.length];notif={t0:performance.now(),col:c[0]};
+  statusEl.textContent='Notification: '+c[1];
+}
+function togglePower(){power=!power;refreshPower();if(power)setTimeout(notify,300);}
+
+document.getElementById('notify').onclick=notify;
+document.getElementById('power').onclick=togglePower;
+document.getElementById('reset').onclick=function(){bottomView=false;tar.x=0.15;tar.y=-0.5;auto=true;document.getElementById('bottom').textContent='Show USB-C port';};
+document.getElementById('bottom').onclick=function(){
+  bottomView=!bottomView;auto=false;
+  tar.x=bottomView?-1.35:0.15;
+  this.textContent=bottomView?'Back to front':'Show USB-C port';
+};
+
+// Drag to rotate, tap the lid button to toggle power
+var last=null,moved=0,ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+var el=renderer.domElement;
+el.addEventListener('pointerdown',function(e){drag=true;auto=false;moved=0;last={x:e.clientX,y:e.clientY};el.setPointerCapture(e.pointerId);stage.style.cursor='grabbing';});
+el.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-last.x,dy=e.clientY-last.y;moved+=Math.abs(dx)+Math.abs(dy);
+  tar.y+=dx*0.01;tar.x=Math.max(-1.7,Math.min(0.7,tar.x+dy*0.01));last={x:e.clientX,y:e.clientY};
+});
+el.addEventListener('pointerup',function(e){
+  drag=false;stage.style.cursor='grab';
+  if(moved<6){
+    var r=el.getBoundingClientRect();
+    ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+    ray.setFromCamera(ndc,camera);
+    if(ray.intersectObjects([dome,bezel,statusRing]).length)togglePower();
+  }
+});
+
+function resize(){
+  var w=stage.clientWidth,h=stage.clientHeight;
+  renderer.setSize(w,h,false);camera.aspect=w/h;
+  camera.position.z=w/h<0.8?14:11;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resize);resize();
+
+function frame(now){
+  requestAnimationFrame(frame);
+  if(auto&&!drag)tar.y+=0.004;
+  cur.x+=(tar.x-cur.x)*0.12;cur.y+=(tar.y-cur.y)*0.12;
+  root.rotation.set(cur.x,cur.y,0);
+  if(notif){
+    var p=(now-notif.t0)/3200;
+    if(p>=1){notif=null;refreshPower();}
+    else setGlow(notif.col,(1-p*0.6)*(0.5+0.5*Math.sin(p*20)));
+  }
+  renderer.render(scene,camera);
+}
+refreshPower();requestAnimationFrame(frame);setTimeout(notify,700);
+})();
+</script>
+</body>
+</html>

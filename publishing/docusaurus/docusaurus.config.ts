@@ -109,7 +109,7 @@ const config: Config = {
   },
 
   future: {
-    experimental_faster: false, // disables experimental minifier causing build crashes
+    faster: false, // disables experimental minifier causing build crashes
   },
 };
 
