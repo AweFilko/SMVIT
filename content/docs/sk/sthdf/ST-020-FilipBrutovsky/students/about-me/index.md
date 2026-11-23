@@ -142,11 +142,10 @@ fm_reserved2: ""
 
 ## 🎯 Profesijné záujmy
 - Machine learning, Deep learning, Databases 
-- 3D modeling, práca s 3D tlačiarňou, základy IoT, spájkovanie
+- 3D modeling, práca s 3D tlačiarňou, základy IoT
 
 ## 💡 Moje hobby / záujmy
 - Lyžovanie, lezenie, spoločenské hry, počítačové hry, čítanie kníh, turistika, všetko čo je spojené so športom prakticky
-- Čokoľvek, čo odhaľuje „ľudskú stránku"
 
 ## 🚀 Očakávania od predmetu
 - Zlepšenie komunikácie, nové zistenia a skills, prehĺbenie a zopakovanie už existujúcich poznatkov a skúseností 

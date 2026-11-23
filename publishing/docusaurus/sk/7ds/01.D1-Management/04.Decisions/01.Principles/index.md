@@ -1,6 +1,6 @@
 # Principles
 
-Princípy, ktorými sa riadia všetky rozhodnutia v projekte Potion Notifier.
+Princípy, ktorými sa riadia všetky rozhodnutia v projekte.
 
 | # | Princíp | Čo to znamená v praxi |
 |---|---|---|

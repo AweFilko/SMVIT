@@ -2,8 +2,8 @@
 
 Opatrenia na zníženie rizík. Zodpovedná osoba a termíny sa doplnia po dohode.
 
-| ID | Opatrenie | Rieši | Zodpovedný | Termín | Stav |
-|---|---|---|---|---|---|
+| ID | Opatrenie | Rieši | Stav |
+|---|---|---|---|
 | M1 | Aplikácia beží ako služba v popredí, používateľa požiadať o výnimku z optimalizácie batérie, test na dvoch značkách telefónov | RK1 | Plánované |
 | M2 | Zmerať skutočný pokojový prúd prúdomerom a podľa toho upraviť interval spojenia | RK2 | Plánované |
 | M3 | Pred objednávkou overiť rozmery článku 250 mAh voči fľaštičke, prípadne zväčšiť brucho | RK3 | Plánované |

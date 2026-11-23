@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Light Potion</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#d9ccf2;--fg:#241c33;--mut:#4f4560;--card:#fffaf0;--bd:#b9a6dc;--sil:#b49bdf;--ac:#6d3fd0;--gl:#d9971f;--c1:#8a8f9c;--c2:#1d9e8a;--c3:#8a63e0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2b2147;--fg:#efe9fa;--mut:#b9afcc;--card:#1f1836;--bd:#4a3d6b;--sil:#1a122e;--ac:#a98bff;--gl:#f0b955}}
+:root[data-theme="dark"]{--bg:#2b2147;--fg:#efe9fa;--mut:#b9afcc;--card:#1f1836;--bd:#4a3d6b;--sil:#1a122e;--ac:#a98bff;--gl:#f0b955}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+h1,h2{font-family:Georgia,"Times New Roman",serif;font-weight:400;line-height:1.1;margin:0}
+a{color:var(--ac)}
+.w{max-width:1040px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+.bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}.bg path{fill:var(--sil)}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.logo{font-family:Georgia,serif;font-size:22px}
+nav a{margin-left:18px;font-size:14px;color:var(--mut);text-decoration:none}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;padding:24px 0 48px}
+.hero h1{font-size:clamp(44px,8vw,84px)}
+.lead{font-size:20px;color:var(--mut);margin:16px 0 20px}
+.tag{display:inline-block;font-size:13px;border:1px solid var(--bd);border-radius:999px;padding:4px 12px;color:var(--mut);margin-bottom:16px}
+#stage{position:relative;height:460px;border:1px solid var(--bd);border-radius:20px;background:var(--card);touch-action:none;cursor:grab;overflow:hidden}
+#stage canvas{display:block;width:100%;height:100%}
+#st{position:absolute;left:0;right:0;top:10px;text-align:center;font-size:13px;color:var(--mut);pointer-events:none}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:8px 14px;cursor:pointer}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff}
+.hint{font-size:12px;color:var(--mut);margin-top:8px}
+section{padding:40px 0}
+h2{font-size:clamp(30px,5vw,44px);margin-bottom:16px}
+.note{border-left:4px solid var(--gl);background:var(--card);padding:16px 20px;border-radius:0 12px 12px 0;margin:0 0 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px}
+.card h3{margin:0 0 6px;font-size:17px}
+.card p{margin:0;color:var(--mut);font-size:15px}
+.num{font-family:Georgia,serif;font-size:34px;color:var(--gl)}
+.dg{overflow-x:auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}
+.dg svg{display:block;min-width:640px;width:100%;height:auto}
+.ln{fill:none;stroke:var(--bd)}.s{font:12px system-ui,sans-serif;fill:var(--fg)}.b{font-weight:600;font-size:13px}
+.tk{fill:var(--card);stroke-width:1.5}.u{stroke:var(--c1)}.f{stroke:var(--c2)}.p2{stroke:var(--c3)}.g{stroke:var(--gl)}
+.m{fill:var(--card);stroke:var(--fg);stroke-width:1.2}.wi{fill:none;stroke:var(--fg);stroke-width:1.5}.wd{stroke-dasharray:4 3}.wr{fill:none;stroke:#d9534f;stroke-width:2}
+ul.n{color:var(--mut);font-size:14px;padding-left:20px}
+footer{border-top:1px solid var(--bd);padding:28px 0;color:var(--mut);font-size:14px;margin-top:24px}
+@media(max-width:760px){.hero{grid-template-columns:1fr}#stage{height:380px}nav{display:none}}
+</style>
+</head>
+<body>
+<svg class="bg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>
+<path id="sp" d="M0 -20Q2 -2 20 0Q2 2 0 20Q-2 2 -20 0Q-2 -2 0 -20z"/>
+<path id="mu" fill-rule="evenodd" d="M-34 0a34 28 0 0 1 68 0zM-12 0h24l-4 36h-16zM-16 -12a5 5 0 1 0 10 0a5 5 0 1 0 -10 0zM8 -16a4 4 0 1 0 8 0a4 4 0 1 0 -8 0z"/>
+<path id="sk" fill-rule="evenodd" d="M-40 0a40 40 0 1 1 80 0c0 14-6 24-14 30v18h-52v-18c-8-6-14-16-14-30zM-22 -4a9 9 0 1 0 18 0a9 9 0 1 0 -18 0zM4 -4a9 9 0 1 0 18 0a9 9 0 1 0 -18 0zM0 8l-5 10h10z"/>
+</defs>
+<use href="#mu" transform="translate(90 740) scale(1.6)"/><use href="#mu" transform="translate(175 770) scale(1)"/><use href="#mu" transform="translate(1085 728) scale(2)"/><use href="#mu" transform="translate(1005 765) scale(1.1)"/>
+<use href="#sk" transform="translate(1050 190) rotate(10) scale(1.8)"/><use href="#sk" transform="translate(120 450) rotate(-12)"/>
+<use href="#sp" transform="translate(200 120) scale(1.4)"/><use href="#sp" transform="translate(600 70)"/><use href="#sp" transform="translate(900 360) scale(1.2)"/><use href="#sp" transform="translate(330 600) scale(1.6)"/><use href="#sp" transform="translate(700 700)"/><use href="#sp" transform="translate(1130 520)"/><use href="#sp" transform="translate(70 260) scale(0.8)"/><use href="#sp" transform="translate(540 430) scale(0.7)"/><use href="#sp" transform="translate(790 150) scale(0.9)"/>
+</svg>
+<div class="w">
+<header><div class="logo">Light Potion</div><nav><a href="#how">How it works</a><a href="#features">Design</a><a href="#inside">Inside</a><a href="#status">Status</a></nav></header>
+
+<div class="hero">
+  <div>
+    <span class="tag">Concept prototype · Android first</span>
+    <h1>Light Potion</h1>
+    <p class="lead">A keychain flask that glows when your phone gets a notification. It flickers for a moment, then fades away.</p>
+    <p>Drag the flask to turn it, tap the button on the cork to switch it on or off, and press the notification button to see it glow.</p>
+  </div>
+  <div>
+    <div id="stage"><div id="st">Standby</div></div>
+    <div class="bar"><button class="p" id="nf">Simulate notification</button><button id="bt">Show USB-C port</button><button id="pw">Power: on</button><button id="rs">Reset view</button></div>
+    <div class="hint">Interactive 3D model of the current design</div>
+  </div>
+</div>
+
+<section>
+  <p class="note"><strong>A note on the design.</strong> The potion flask is the first design, not the final one. The electronics do not depend on the shape, so later versions can look different: other bottles, charms or small objects.</p>
+</section>
+
+<section id="how">
+  <h2>How it works</h2>
+  <div class="grid">
+    <div class="card"><div class="num">1</div><h3>Android app</h3><p>Listens for notifications and reads only the category.</p></div>
+    <div class="card"><div class="num">2</div><h3>Bluetooth LE</h3><p>Sends two bytes to the flask: category and urgency. Never the message text.</p></div>
+    <div class="card"><div class="num">3</div><h3>Flask brain</h3><p>An ESP32-C3 picks a colour: call green, message blue, email yellow.</p></div>
+    <div class="card"><div class="num">4</div><h3>Glow</h3><p>Three LEDs flicker for 2–3 seconds, then fade out.</p></div>
+  </div>
+  <h2 style="font-size:26px;margin:32px 0 12px">The full process</h2>
+  <div class="dg" id="bpmn"></div>
+</section>
+
+<section id="features">
+  <h2>Design</h2>
+  <div class="grid">
+    <div class="card"><h3>Cork lid button</h3><p>A latching push button on top switches the battery fully on or off.</p></div>
+    <div class="card"><h3>USB-C on the base</h3><p>Charge it from the bottom of the flask.</p></div>
+    <div class="card"><h3>Frosted glass body</h3><p>The whole flask glows, not just a single dot.</p></div>
+    <div class="card"><h3>Brass collar and key ring</h3><p>A small loop on the neck keeps the lid free for the button.</p></div>
+  </div>
+</section>
+
+<section id="inside">
+  <h2>Inside</h2>
+  <div class="grid" style="margin-bottom:20px">
+    <div class="card"><div class="num">≈ 8 days</div><p>per charge, an estimate that still has to be measured</p></div>
+    <div class="card"><h3>XIAO ESP32-C3</h3><p>Battery charger and 3.3 V regulator on the board.</p></div>
+    <div class="card"><h3>250 mAh LiPo</h3><p>Protected cell, small enough for a flask about 35 mm wide.</p></div>
+    <div class="card"><h3>3 WS2812B LEDs</h3><p>Switched off by a MOSFET when idle to save power.</p></div>
+  </div>
+  <div class="dg" id="sch"></div>
+  <ul class="n">
+    <li>GPIO3 high turns Q1 on, which pulls Q2’s gate low and powers the LEDs. Low or floating keeps them off.</li>
+    <li>The firmware sets GPIO4 low before the LED power is switched off.</li>
+    <li>The board charges the battery from USB-C only while the lid button is on.</li>
+  </ul>
+</section>
+
+<section id="status">
+  <h2>Status and roadmap</h2>
+  <div class="grid">
+    <div class="card"><h3>Now</h3><p>Design, documentation, schematic and 3D model are done. A breadboard prototype is next.</p></div>
+    <div class="card"><h3>Version 1</h3><p>Potion flask with the Android app.</p></div>
+    <div class="card"><h3>Later</h3><p>App settings, iPhone support, and new shapes beyond the potion.</p></div>
+  </div>
+  <p style="color:var(--mut);margin-top:16px">Light Potion is a concept in development and is not for sale yet.</p>
+</section>
+<footer>Light Potion · concept prototype · 2026</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ---------- diagrams ----------
+function mk(id){return '<marker id="'+id+'" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="var(--fg)" stroke-width="1.5"/></marker>';}
+function tx(x,y,t,a,c){return '<text class="s '+(c||'')+'" x="'+x+'" y="'+y+'"'+(a?' text-anchor="'+a+'"':'')+'>'+t+'</text>';}
+function tk(c,x,y,w,h,a,b){var cx=x+w/2,cy=y+h/2;return '<rect class="tk '+c+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="6"/>'+(a?tx(cx,cy+(b?-3:4),a,'middle'):'')+(b?tx(cx,cy+11,b,'middle'):'');}
+function ar(d,k,m){return '<path d="'+d+'" class="wi '+(k||'')+'" marker-end="url(#'+m+')"'+(k?' marker-start="url(#'+m+')"':'')+'/>';}
+function wi(d,c){return '<path d="'+d+'" class="'+(c||'wi')+'"/>';}
+function lane(y,h,t){return '<rect class="ln" x="10" y="'+y+'" width="660" height="'+h+'"/>'+tx(22,y+20,t,0,'b');}
+function dot(x,y,c){return '<circle cx="'+x+'" cy="'+y+'" r="3" fill="'+(c||'var(--fg)')+'"/>';}
+function gnd(x,y){return wi('M'+(x-8)+' '+y+'h16M'+(x-5)+' '+(y+5)+'h10M'+(x-2)+' '+(y+10)+'h4');}
+
+(function(){
+var s='<svg viewBox="0 0 680 440" role="img" aria-label="BPMN process diagram"><defs>'+mk('a1')+'</defs>';
+s+=lane(10,110,'User')+lane(120,202,'Dongle firmware')+lane(322,110,'Android phone (companion app)');
+s+='<circle class="m" cx="46" cy="72" r="13"/>'+tk('u',78,52,100,40,'Press lid','button (on)')+tk('u',468,52,100,40,'See flask','flicker');
+s+=tk('f',78,170,100,40,'Boot, check','battery')+'<polygon class="m" points="224,170 244,190 224,210 204,190"/>'+wi('M217 183L231 197M231 183L217 197')+tx(224,160,'Battery OK?','middle')+tx(252,181,'yes','middle')+tx(232,236,'no');
+s+=tk('f',78,232,100,40,'Red blink,','deep sleep')+'<circle class="m" cx="46" cy="252" r="11" stroke-width="3"/>'+tk('f',262,170,100,40,'Advertise,','pair, bond');
+s+='<circle class="m" cx="434" cy="190" r="13"/><circle class="m" cx="434" cy="190" r="9"/>'+tx(434,160,'GATT write','middle');
+s+=tk('f',468,170,100,40,'Flicker LED','2–3 s')+tk('f',468,232,100,40,'Fade out,','LED supply off')+'<circle class="m" cx="518" cy="296" r="11" stroke-width="3"/>'+tx(536,300,'Idle');
+s+=tk('p2',262,357,100,40,'Pair in app,','grant access')+tk('p2',384,357,100,40,'Listener sees,','writes GATT');
+['M59 72H76','M128 92V168','M178 190H202','M244 190H260','M224 210V252H180','M78 252H59','M362 190H419','M447 190H466','M518 170V94','M518 210V230','M518 272V284','M362 377H382'].forEach(function(d){s+=ar(d,0,'a1');});
+s+=ar('M312 212V355','wd','a1')+ar('M434 357V205','wd','a1').replace(' marker-start="url(#a1)"','');
+document.getElementById('bpmn').innerHTML=s+'</svg>';
+})();
+
+(function(){
+var s='<svg viewBox="0 0 680 470" role="img" aria-label="Wiring schematic"><defs>'+mk('a2')+'</defs>';
+['M65 240V170','M65 130V70H490','M150 70V255H190','M400 70V85','M400 115V135','M490 70V100'].forEach(function(d){s+=wi(d,'wr');});
+s+=tx(75,62,'BAT+ (after lid button)')+dot(150,70,'#d9534f')+dot(400,70,'#d9534f');
+s+=tk('g',20,240,90,70,'LiPo 250 mAh','protected')+tk('u',40,130,50,40,'SW1')+tx(98,146,'Lid button,')+tx(98,160,'latching');
+s+=tk('f',190,230,140,210,'XIAO ESP32-C3')+tx(198,259,'BAT+')+tx(198,424,'BAT−')+tx(322,299,'D1 · GPIO3','end')+tx(322,399,'D2 · GPIO4','end')+tx(322,424,'GND','end');
+['M190 420H160V438','M330 420H350V438','M65 310V335','M330 295H390','M360 295V312','M360 336V348','M430 320V345','M430 270V240H400V135H440','M490 170V200H545V285H560','M505 200V225','M505 249V262','M330 395H360','M410 395H545V330H560','M610 380V392'].forEach(function(d){s+=wi(d);});
+s+=dot(360,295)+dot(400,135)+dot(505,200);
+[[65,335],[160,438],[350,438],[360,348],[430,345],[505,262],[610,392]].forEach(function(p){s+=gnd(p[0],p[1]);});
+s+=tk('u',388,85,24,30,'')+tx(380,104,'R1 100 kΩ','end')+tk('u',348,312,24,24,'')+tx(344,326,'R2 100 kΩ','end')+tk('u',360,383,50,24,'R3 330 Ω')+tk('u',490,225,30,24,'')+tx(525,241,'C1 100 µF');
+s+=tk('u',390,270,80,50,'Q1','2N7002')+tk('u',440,100,100,70,'Q2 · AO3401','P-MOS switch')+tx(548,192,'LED VDD');
+s+=tk('p2',560,260,105,120,'WS2812B','1–3 pixels')+tx(568,289,'VDD')+tx(568,334,'DIN')+tx(612,372,'GND','middle');
+document.getElementById('sch').innerHTML=s+'</svg>';
+})();
+
+// ---------- 3D model ----------
+(function(){
+var stage=document.getElementById('stage'),st=document.getElementById('st');
+var R=new THREE.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(window.devicePixelRatio||1,2));stage.appendChild(R.domElement);
+var sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,1,0.1,100);cam.position.set(0,0.8,11);
+sc.add(new THREE.AmbientLight(0xffffff,0.65));
+var k=new THREE.DirectionalLight(0xffffff,0.9);k.position.set(4,6,5);sc.add(k);
+var r2=new THREE.DirectionalLight(0x9aa8ff,0.5);r2.position.set(-5,2,-4);sc.add(r2);
+var root=new THREE.Group();sc.add(root);var B=new THREE.Group();B.position.y=-1.75;root.add(B);
+var pts=[[0.62,0],[0.85,0.06],[0.98,0.35],[1.02,0.8],[0.95,1.25],[0.74,1.7],[0.46,1.98],[0.31,2.2],[0.28,2.65]].map(function(p){return new THREE.Vector2(p[0],p[1]);});
+var prof=[new THREE.Vector2(0,0)].concat(new THREE.SplineCurve(pts).getPoints(60));
+var glass=new THREE.Mesh(new THREE.LatheGeometry(prof,64),new THREE.MeshStandardMaterial({color:0xbfe6ff,transparent:true,opacity:0.3,roughness:0.15,metalness:0.1,side:THREE.DoubleSide,depthWrite:false}));glass.renderOrder=3;B.add(glass);
+var inn=prof.filter(function(p){return p.y<1.9;}).map(function(p){return new THREE.Vector2(p.x*0.88,p.y*0.95+0.05);});inn.push(new THREE.Vector2(0,inn[inn.length-1].y));
+var gm=new THREE.MeshBasicMaterial({color:0x222233,transparent:true,opacity:0.12,depthWrite:false,side:THREE.DoubleSide});var gl=new THREE.Mesh(new THREE.LatheGeometry(inn,48),gm);gl.renderOrder=2;B.add(gl);
+var bt=new THREE.Mesh(new THREE.BoxGeometry(0.9,1.1,0.14),new THREE.MeshStandardMaterial({color:0x2b2f3d,roughness:0.6}));bt.position.set(0,1.0,-0.1);B.add(bt);
+var bd=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.52,0.05),new THREE.MeshStandardMaterial({color:0x1f7c96,roughness:0.5}));bd.position.set(0,1.0,0);B.add(bd);
+var px=[];for(var i=0;i<3;i++){var a=i*2.094+0.5,m=new THREE.MeshBasicMaterial({color:0x333344});px.push(m);var s=new THREE.Mesh(new THREE.SphereGeometry(0.07,16,12),m);s.position.set(Math.cos(a)*0.4,0.3,Math.sin(a)*0.4);B.add(s);}
+var lt=new THREE.PointLight(0x7a4fd0,0,7);lt.position.set(0,0.9,0);B.add(lt);
+var gold=new THREE.MeshStandardMaterial({color:0xd6a83a,metalness:0.8,roughness:0.35}),silver=new THREE.MeshStandardMaterial({color:0xc9ced6,metalness:0.9,roughness:0.3});
+var ck=new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.31,0.62,32),new THREE.MeshStandardMaterial({color:0xa9744a,roughness:1}));ck.position.y=2.95;B.add(ck);
+var co=new THREE.Mesh(new THREE.TorusGeometry(0.33,0.05,12,40),gold);co.rotation.x=Math.PI/2;co.position.y=2.58;B.add(co);
+var lp=new THREE.Mesh(new THREE.TorusGeometry(0.17,0.035,10,32),gold);lp.position.set(0.5,2.58,0);B.add(lp);
+var rg=new THREE.Mesh(new THREE.TorusGeometry(0.6,0.03,10,48),silver);rg.rotation.y=Math.PI/2;rg.position.set(0.5,3.18,0);B.add(rg);
+var bz=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.25,0.04,32),gold);bz.position.y=3.28;B.add(bz);
+var dm=new THREE.Mesh(new THREE.SphereGeometry(0.16,24,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0xf2e9d8,roughness:0.35}));dm.scale.y=0.6;dm.position.y=3.3;B.add(dm);
+var rm=new THREE.MeshBasicMaterial({color:0x2ecc71});var sr=new THREE.Mesh(new THREE.TorusGeometry(0.21,0.018,8,40),rm);sr.rotation.x=Math.PI/2;sr.position.y=3.31;B.add(sr);
+var rb=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.03,0.22),silver);rb.position.y=-0.005;B.add(rb);
+var ho=new THREE.Mesh(new THREE.BoxGeometry(0.44,0.034,0.14),new THREE.MeshBasicMaterial({color:0x050507}));ho.position.y=-0.012;B.add(ho);
+var tg=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.036,0.03),new THREE.MeshStandardMaterial({color:0x777b86,metalness:0.7,roughness:0.4}));tg.position.y=-0.013;B.add(tg);
+
+var power=true,nt=null,cols=[[0x2ecc71,'call (green)'],[0x4aa3ff,'message (blue)'],[0xffcc33,'email (yellow)']],ci=0;
+var cur={x:0.15,y:-0.5},tar={x:0.15,y:-0.5},auto=true,drag=false,bv=false;
+function glow(c,v){gm.color.setHex(c);gm.opacity=0.1+0.5*v;lt.color.setHex(c);lt.intensity=2.2*v;px.forEach(function(m){m.color.setHex(v>0.02?c:0x333344);});}
+function ref(){rm.color.setHex(power?0x2ecc71:0x555560);document.getElementById('pw').textContent='Power: '+(power?'on':'off');if(!power){nt=null;glow(0x222233,0);st.textContent='Power is off';}else if(!nt){st.textContent='Standby';glow(0x222233,0);}}
+function notify(){if(!power){st.textContent='Power is off, switch it on first';return;}var c=cols[ci++%3];nt={t:performance.now(),c:c[0]};st.textContent='Notification: '+c[1];}
+function tp(){power=!power;ref();if(power)setTimeout(notify,300);}
+document.getElementById('nf').onclick=notify;document.getElementById('pw').onclick=tp;
+document.getElementById('rs').onclick=function(){bv=false;tar.x=0.15;tar.y=-0.5;auto=true;document.getElementById('bt').textContent='Show USB-C port';};
+document.getElementById('bt').onclick=function(){bv=!bv;auto=false;tar.x=bv?-1.35:0.15;this.textContent=bv?'Back to front':'Show USB-C port';};
+var last=null,mv=0,ray=new THREE.Raycaster(),nd=new THREE.Vector2(),el=R.domElement;
+el.addEventListener('pointerdown',function(e){drag=true;auto=false;mv=0;last={x:e.clientX,y:e.clientY};el.setPointerCapture(e.pointerId);});
+el.addEventListener('pointermove',function(e){if(!drag)return;var dx=e.clientX-last.x,dy=e.clientY-last.y;mv+=Math.abs(dx)+Math.abs(dy);tar.y+=dx*0.01;tar.x=Math.max(-1.7,Math.min(0.7,tar.x+dy*0.01));last={x:e.clientX,y:e.clientY};});
+el.addEventListener('pointerup',function(e){drag=false;if(mv<6){var r=el.getBoundingClientRect();nd.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(nd,cam);if(ray.intersectObjects([dm,bz,sr]).length)tp();}});
+function rz(){var w=stage.clientWidth,h=stage.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.position.z=w/h<0.9?13:11;cam.updateProjectionMatrix();}
+window.addEventListener('resize',rz);rz();
+function fr(now){requestAnimationFrame(fr);if(auto&&!drag)tar.y+=0.004;cur.x+=(tar.x-cur.x)*0.12;cur.y+=(tar.y-cur.y)*0.12;root.rotation.set(cur.x,cur.y,0);
+if(nt){var p=(now-nt.t)/3000;if(p>=1){nt=null;ref();}else glow(nt.c,(1-p*0.7)*(0.5+0.5*Math.sin(p*22)));}
+R.render(sc,cam);}
+ref();requestAnimationFrame(fr);setTimeout(notify,800);
+})();
+</script>
+</body>
+</html>
